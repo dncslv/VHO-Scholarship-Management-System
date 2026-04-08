@@ -138,8 +138,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--pink);min-height:100vh;di
 
 <script>
   // Supabase setup
-  window.SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
-  window.SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
+  window.SUPABASE_URL = "https://kyyfmlstyfsorctizztj.supabase.co";
+  window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5eWZtbHN0eWZzb3JjdGl6enRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MzYyNjEsImV4cCI6MjA5MTIxMjI2MX0.1TlWmjoDAsezW7-dMSltwWAbjEgNIp_Z8pqJ8pDy7Sw";
 
   const supabase = window.supabase.createClient(
     window.SUPABASE_URL,
@@ -171,20 +171,30 @@ window.onload=()=>{
 };
 function setRole(r,el){role=r;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on')}
 function showErr(msg){const e=document.getElementById('errMsg');e.textContent=msg;e.classList.add('show')}
-function doLogin(){
-  const email=document.getElementById('loginEmail').value.trim();
-  const pw=document.getElementById('loginPw').value;
-  const remember=document.getElementById('rememberMe').checked;
-  if(!email||!pw){showErr('Please enter your email and password.');return}
-  if(remember)localStorage.setItem('vho_remember',email); else localStorage.removeItem('vho_remember');
-  // Demo auth
-  const users=JSON.parse(localStorage.getItem('vho_users')||'[]');
-  // Default admin
-  if(role==='admin'&&email==='admin@vho.org'&&pw==='admin123'){
-    localStorage.setItem('vho_role','admin');
-    localStorage.setItem('vho_current',JSON.stringify({id:'admin1',name:'Admin User',email,role:'admin'}));
-    window.location.href='admin.html';return;
-  }
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const remember = document.getElementById('rememberMe').checked;
+  if(!email || !pw) { showErr('Please enter your email and password.'); return; }
+
+  // Supabase login
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
+  if(error) { showErr(error.message); return; }
+
+  // Fetch user profile
+  const { data: profile, error: pError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single();
+
+  if(pError) { showErr(pError.message); return; }
+
+  if(remember) localStorage.setItem('vho_remember', email); 
+  else localStorage.removeItem('vho_remember');
+
+  window.location.href = profile.role === 'admin' ? 'admin-dashboard.html' : 'scholar-dashboard.html';
+}
   // Scholar login
   const scholar=users.find(u=>u.email===email&&u.role==='scholar'&&u.status!=='inactive');
   if(scholar){
