@@ -162,25 +162,28 @@ function showErr(msg){const e=document.getElementById('errMsg');e.textContent=ms
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPw').value;
-  const remember = document.getElementById('rememberMe').checked;
-  if(!email || !pw) { showErr('Please enter your email and password.'); return; }
 
-  // Supabase login
+  if(!email || !pw){ showErr('Enter email and password'); return; }
+
+  // Login via Supabase
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
-  if(error) { showErr(error.message); return; }
+  if(error){ showErr(error.message); return; }
 
-  // Fetch user profile
+  // Get profile info (role)
   const { data: profile, error: pError } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', data.user.id)
     .single();
 
-  if(pError) { showErr(pError.message); return; }
+  if(pError){ showErr(pError.message); return; }
 
-  if(remember) localStorage.setItem('vho_remember', email); 
-  else localStorage.removeItem('vho_remember');
+  // Remember email
+  if(document.getElementById('rememberMe').checked){
+    localStorage.setItem('vho_remember', email);
+  } else localStorage.removeItem('vho_remember');
 
+  // Redirect based on role
   window.location.href = profile.role === 'admin' ? 'admin-dashboard.html' : 'scholar-dashboard.html';
 }
   // Scholar login
