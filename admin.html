@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – VHO SMS</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.level-tag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:none;color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif}
+.level-tag.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.dot-green{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;margin-right:4px}
+.dot-red{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;margin-right:4px}
+.dot-gray{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:4px}
+.dot-amber{width:7px;height:7px;border-radius:50%;background:var(--warn);display:inline-block;margin-right:4px}
+.audit-action{font-weight:500;font-size:12px}
+.search-row{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border);background:#fafafa}
+.search-row input,.search-row select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:#fff;outline:none;min-width:0;flex:1;max-width:200px}
+.search-row input:focus,.search-row select:focus{border-color:var(--blue)}
+.msg-list-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;transition:background .15s}
+.msg-list-item:hover,.msg-list-item.on{background:var(--blue-pale)}
+.gwa-big{font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:300;line-height:1}
+.poll-result-row{margin-bottom:12px}
+.poll-result-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.link-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:var(--blue-pale);color:var(--blue2);font-size:12px;text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.link-tag svg{flex-shrink:0}
+.img-preview-wrap{border-radius:10px;overflow:hidden;max-height:200px;margin-top:8px}
+.img-preview-wrap img{width:100%;height:200px;object-fit:cover}
+.add-link-row{display:flex;gap:6px;margin-top:6px}
+.link-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:var(--blue-pale);color:var(--blue2);font-size:12px;margin:2px}
+.link-chip button{background:none;border:none;cursor:pointer;color:var(--blue2);padding:0;font-size:13px;margin-left:2px}
+.dash-two{display:grid;grid-template-columns:1fr 320px;gap:16px}
+@media(max-width:900px){.dash-two{grid-template-columns:1fr}}
+@media(max-width:640px){.msg-grid{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 30 30"><path d="M15 26s-11-7-11-14a7 7 0 0 1 11-5.7A7 7 0 0 1 26 12c0 7-11 14-11 14z" fill="#e05065"/><path d="M15 26s0-7 0-14a7 7 0 0 1 11-5.7C26 12 15 26 15 26z" fill="#a83248"/></svg>
+    <div class="logo-text">Victoria Heartstrong<span>Organization</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Overview</div>
+    <a class="nav-item active" data-page="dashboard">
+      <svg fill="currentColor" viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <div class="nav-group-label">Scholars</div>
+    <a class="nav-item" data-page="scholars">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 1 1 6 0 3 3 0 0 1-6 0zM1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm14-1a5 5 0 0 1 4 5H13a5 5 0 0 1 4-5z"/></svg>All Scholars</a>
+    <a class="nav-item" data-page="gwa">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 11h2v5H2zm4-4h2v9H6zm4-3h2v12h-2zm4 5h2v7h-2z"/></svg>GWA Records</a>
+    <div class="nav-group-label">Communication</div>
+    <a class="nav-item" data-page="messages">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4l-4 4V5z"/></svg>Messages<span class="nav-badge" id="nb-messages" style="display:none">0</span></a>
+    <a class="nav-item" data-page="announcements">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zm0 16a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z"/></svg>Announcements</a>
+    <a class="nav-item" data-page="polls">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 0 0 0 2h2a1 1 0 0 0 0-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 0 1 2-2 3 3 0 0 0 3 3h2a3 3 0 0 0 3-3 2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5z"/></svg>Polls</a>
+    <a class="nav-item" data-page="notifications">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zm0 16a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z"/></svg>Notifications<span class="nav-badge" id="nb-notifications" style="display:none">0</span></a>
+    <div class="nav-group-label">System</div>
+    <a class="nav-item" data-page="auditlog">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 0 2H4a1 1 0 0 1-1-1zm0 4a1 1 0 0 1 1-1h12a1 1 0 0 1 0 2H4a1 1 0 0 1-1-1zm0 4a1 1 0 0 1 1-1h12a1 1 0 0 1 0 2H4a1 1 0 0 1-1-1zm0 4a1 1 0 0 1 1-1h7a1 1 0 0 1 0 2H4a1 1 0 0 1-1-1z"/></svg>Audit Logs</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip" onclick="logout()">
+      <div class="avatar">A</div>
+      <div class="user-info"><div class="user-name">Admin User</div><div class="user-role">Administrator</div></div>
+      <svg width="14" height="14" fill="rgba(255,255,255,.4)" viewBox="0 0 20 20"><path d="M3 3a1 1 0 0 0 0 2h11.586l-2.293 2.293a1 1 0 1 0 1.414 1.414l4-4a1 1 0 0 0 0-1.414l-4-4a1 1 0 1 0-1.414 1.414L14.586 3H3z"/></svg>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <span class="topbar-title" id="pageTitle">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <a class="icon-btn" onclick="exportPDF()" title="Export PDF">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1zm3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414z"/></svg>
+      </a>
+      <a class="icon-btn" data-page="notifications" style="position:relative;">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zm0 16a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z"/></svg>
+        <span class="notif-dot" id="topNotifDot" style="display:none"></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page">
+      <div class="page-header">
+        <div class="page-header-left"><h1>Good day, Admin ♥</h1><p>VHO Scholarship Management Overview</p></div>
+      </div>
+      <div class="stat-grid" id="dashStats"></div>
+      <div class="dash-two">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Recent Scholars</span><button class="btn btn-ghost btn-sm" data-page="scholars">View all</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Scholar</th><th>Level</th><th>School Type</th><th>GWA</th><th>Status</th></tr></thead><tbody id="dashTable"></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Activity Feed</span></div>
+          <div class="card-body" id="dashFeed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHOLARS -->
+    <div id="page-scholars" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-header-left"><h1>All Scholars</h1><p>High school &amp; college scholars</p></div>
+        <button class="btn btn-primary" onclick="openModal('mAddScholar')">+ Add Scholar</button>
+      </div>
+      <div class="card">
+        <div class="search-row">
+          <input id="sSearch" placeholder="Search name or email…" oninput="renderScholarsTable()">
+          <select id="sYear" onchange="renderScholarsTable()"><option value="">All Year Levels</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>1st Year College</option><option>2nd Year College</option><option>3rd Year College</option><option>4th Year College</option></select>
+          <select id="sType" onchange="renderScholarsTable()"><option value="">All Types</option><option value="High School">High School</option><option value="College">College</option></select>
+          <select id="sStatus" onchange="renderScholarsTable()"><option value="">All Statuses</option><option value="active">Active</option><option value="graduated">Graduated</option><option value="inactive">Inactive</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Scholar</th><th>School Type</th><th>Year/Grade</th><th>Course/Strand</th><th>GWA</th><th>Docs</th><th>Status</th><th>Actions</th></tr></thead><tbody id="scholarsTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- GWA -->
+    <div id="page-gwa" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>GWA Records</h1><p>Passing threshold: 2.00 (equivalent to 85+)</p></div></div>
+      <div class="card">
+        <div class="search-row">
+          <select id="gYear" onchange="renderGWA()"><option value="">All Year Levels</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>1st Year College</option><option>2nd Year College</option><option>3rd Year College</option><option>4th Year College</option></select>
+          <select id="gType" onchange="renderGWA()"><option value="">All Types</option><option value="High School">High School</option><option value="College">College</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Scholar</th><th>School Type</th><th>Year Level</th><th>GWA</th><th>Equivalent %</th><th>Bar</th><th>Status</th></tr></thead><tbody id="gwaTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div id="page-messages" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>Messages</h1><p>Chat with scholars</p></div></div>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:14px;min-height:480px" class="msg-grid">
+        <div class="card" style="overflow-y:auto;max-height:520px">
+          <div class="card-header"><span class="card-title">Conversations</span></div>
+          <div style="padding:8px" id="msgList"></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;min-height:480px">
+          <div class="card-header" id="msgHead"><span class="card-title" style="color:var(--muted)">Select a conversation</span></div>
+          <div class="chat-body" id="chatBody"></div>
+          <div class="chat-input-row">
+            <input id="chatIn" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendAdminMsg()">
+            <button class="btn btn-primary" onclick="sendAdminMsg()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANNOUNCEMENTS -->
+    <div id="page-announcements" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-header-left"><h1>Announcements</h1><p>Broadcast to all scholars</p></div>
+        <button class="btn btn-primary" onclick="openModal('mAnn')">+ New Announcement</button>
+      </div>
+      <div id="annList"></div>
+    </div>
+
+    <!-- POLLS -->
+    <div id="page-polls" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-header-left"><h1>Polls</h1><p>Create and manage scholar polls</p></div>
+        <button class="btn btn-primary" onclick="openModal('mPoll')">+ Create Poll</button>
+      </div>
+      <div id="pollList"></div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="page-notifications" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>Notifications</h1><p>System activity alerts</p></div>
+        <button class="btn btn-ghost btn-sm" onclick="clearNotifs()">Mark all read</button>
+      </div>
+      <div class="card"><div class="card-body" id="notifList"></div></div>
+    </div>
+
+    <!-- AUDIT LOG -->
+    <div id="page-auditlog" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>Audit Logs</h1><p>Track all system actions</p></div></div>
+      <div class="card">
+        <div class="table-wrap"><table><thead><tr><th>Date &amp; Time</th><th>User</th><th>Role</th><th>Action</th><th>Details</th></tr></thead><tbody id="auditTable"></tbody></table></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ══ MODALS ══════════════════════════════════════════ -->
+
+<!-- Add Scholar -->
+<div class="modal-bg" id="mAddScholar" onclick="if(event.target===this)closeModal('mAddScholar')">
+<div class="modal">
+  <button class="modal-close" onclick="closeModal('mAddScholar')">✕</button>
+  <h2 class="modal-title">Add New Scholar</h2>
+  <p class="modal-sub">Fill in scholar details. Default password: firstname@vho.org</p>
+  <div class="form-row">
+    <div class="form-field"><label class="form-label">First Name *</label><input class="form-input" id="f_fn" placeholder="Maria"></div>
+    <div class="form-field"><label class="form-label">Last Name *</label><input class="form-input" id="f_ln" placeholder="Santos"></div>
+  </div>
+  <div class="form-field"><label class="form-label">Email *</label><input class="form-input" id="f_em" type="email" placeholder="maria@email.com"></div>
+  <div class="form-row">
+    <div class="form-field"><label class="form-label">School Type *</label>
+      <select class="form-select" id="f_stype" onchange="updateYearOpts()"><option value="High School">High School</option><option value="College">College</option></select></div>
+    <div class="form-field"><label class="form-label">Year/Grade Level *</label>
+      <select class="form-select" id="f_year"></select></div>
+  </div>
+  <div class="form-row">
+    <div class="form-field"><label class="form-label">Course / Strand</label><input class="form-input" id="f_course" placeholder="STEM / BS Nursing"></div>
+    <div class="form-field"><label class="form-label">School Name</label><input class="form-input" id="f_school" placeholder="University name"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-field"><label class="form-label">GWA (1.00–5.00 or 0–100)</label><input class="form-input" id="f_gwa" type="number" placeholder="1.75" step="0.01"></div>
+    <div class="form-field"><label class="form-label">Contact Number</label><input class="form-input" id="f_phone" placeholder="09XXXXXXXXX"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('mAddScholar')">Cancel</button>
+    <button class="btn btn-primary" onclick="addScholar()">Add Scholar</button>
+  </div>
+</div></div>
+
+<!-- Edit Scholar Status -->
+<div class="modal-bg" id="mStatus" onclick="if(event.target===this)closeModal('mStatus')">
+<div class="modal">
+  <button class="modal-close" onclick="closeModal('mStatus')">✕</button>
+  <h2 class="modal-title">Change Scholar Status</h2>
+  <p class="modal-sub" id="statusModalSub">Update the status for this scholar.</p>
+  <div class="form-field"><label class="form-label">Status</label>
+    <select class="form-select" id="statusSelect">
+      <option value="active">Active</option>
+      <option value="graduated">Graduated</option>
+      <option value="inactive">Inactive</option>
+    </select>
+  </div>
+  <div class="form-field"><label class="form-label">Reason (optional)</label><input class="form-input" id="statusReason" placeholder="e.g. Graduated April 2026"></div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('mStatus')">Cancel</button>
+    <button class="btn btn-primary" onclick="saveStatus()">Save Status</button>
+  </div>
+</div></div>
+
+<!-- Announcement Modal -->
+<div class="modal-bg" id="mAnn" onclick="if(event.target===this)closeModal('mAnn')">
+<div class="modal">
+  <button class="modal-close" onclick="closeModal('mAnn')">✕</button>
+  <h2 class="modal-title">New Announcement</h2>
+  <p class="modal-sub">Scholars will receive a notification.</p>
+  <div class="form-row">
+    <div class="form-field"><label class="form-label">Title *</label><input class="form-input" id="a_title" placeholder="Announcement title"></div>
+    <div class="form-field"><label class="form-label">Category</label>
+      <select class="form-select" id="a_cat"><option>General</option><option>Important</option><option>Deadline</option><option>Event</option></select></div>
+  </div>
+  <div class="form-field"><label class="form-label">Message *</label><textarea class="form-textarea" id="a_body" placeholder="Write your announcement here…"></textarea></div>
+  <div class="form-field">
+    <label class="form-label">Image (optional)</label>
+    <div class="upload-zone" onclick="document.getElementById('a_img').click()">
+      <svg width="28" height="28" fill="none" stroke="var(--light)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      <p><strong>Click to upload</strong> image</p><p>JPG, PNG, GIF – optional</p>
+    </div>
+    <input type="file" id="a_img" accept="image/*" style="display:none" onchange="previewImg('a_img','a_img_prev')">
+    <div class="img-preview-wrap" id="a_img_prev"><img id="a_img_prevImg" src=""></div>
+  </div>
+  <div class="form-field">
+    <label class="form-label">Links (optional)</label>
+    <div class="add-link-row">
+      <input class="form-input" id="a_linkUrl" placeholder="https://forms.google.com/..." style="flex:1">
+      <input class="form-input" id="a_linkLabel" placeholder="Label" style="max-width:130px">
+      <button class="btn btn-ghost btn-sm" onclick="addAnnLink()">+ Add</button>
+    </div>
+    <div id="a_linksPreview" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('mAnn')">Cancel</button>
+    <button class="btn btn-primary" onclick="postAnn()">Post Announcement</button>
+  </div>
+</div></div>
+
+<!-- Poll Modal -->
+<div class="modal-bg" id="mPoll" onclick="if(event.target===this)closeModal('mPoll')">
+<div class="modal">
+  <button class="modal-close" onclick="closeModal('mPoll')">✕</button>
+  <h2 class="modal-title">Create Poll</h2>
+  <p class="modal-sub">Scholars will be notified to participate.</p>
+  <div class="form-field"><label class="form-label">Poll Question *</label><input class="form-input" id="p_q" placeholder="What do you think about…"></div>
+  <div class="form-field">
+    <label class="form-label">Image (optional)</label>
+    <div class="upload-zone" onclick="document.getElementById('p_img').click()">
+      <svg width="28" height="28" fill="none" stroke="var(--light)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      <p><strong>Click to upload</strong> image (optional)</p>
+    </div>
+    <input type="file" id="p_img" accept="image/*" style="display:none" onchange="previewImg('p_img','p_img_prev')">
+    <div class="img-preview-wrap" id="p_img_prev"><img id="p_img_prevImg" src=""></div>
+  </div>
+  <div class="form-field">
+    <label class="form-label">Options (one per line, min 2) *</label>
+    <textarea class="form-textarea" id="p_opts" placeholder="Option A&#10;Option B&#10;Option C" style="min-height:80px"></textarea>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('mPoll')">Cancel</button>
+    <button class="btn btn-primary" onclick="createPoll()">Create Poll</button>
+  </div>
+</div></div>
+
+<!-- Scholar Detail Modal -->
+<div class="modal-bg" id="mScholarDetail" onclick="if(event.target===this)closeModal('mScholarDetail')">
+<div class="modal" id="mScholarDetailBody"></div></div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+/* ── STORAGE HELPERS ──────────────────────────── */
+const S={
+  get:(k,d=[])=>JSON.parse(localStorage.getItem('vho_'+k)||JSON.stringify(d)),
+  set:(k,v)=>localStorage.setItem('vho_'+k,JSON.stringify(v))
+};
+
+/* ── INIT DATA ────────────────────────────────── */
+function initData(){
+  if(!S.get('scholars',[]).length){
+    S.set('scholars',[
+      {id:1,firstname:'Maria',lastname:'Santos',email:'maria@vho.org',schoolType:'College',year:'2nd Year College',course:'BS Nursing',school:'UST',gwa:'1.50',hasCert:true,hasRC:true,status:'active',phone:'09171234567'},
+      {id:2,firstname:'Ana',lastname:'Reyes',email:'ana@vho.org',schoolType:'College',year:'3rd Year College',course:'BS Pharmacy',school:'UP Manila',gwa:'1.75',hasCert:false,hasRC:true,status:'active',phone:'09181234567'},
+      {id:3,firstname:'Carla',lastname:'Dizon',email:'carla@vho.org',schoolType:'High School',year:'Grade 12',course:'STEM',school:'Makati High School',gwa:'1.90',hasCert:true,hasRC:true,status:'graduated',phone:'09191234567'},
+      {id:4,firstname:'Diana',lastname:'Flores',email:'diana@vho.org',schoolType:'College',year:'4th Year College',course:'BS Medical Technology',school:'PLM',gwa:'1.25',hasCert:true,hasRC:true,status:'active',phone:'09201234567'},
+      {id:5,firstname:'Elena',lastname:'Cruz',email:'elena@vho.org',schoolType:'High School',year:'Grade 11',course:'ABM',school:'BPC',gwa:'2.50',hasCert:false,hasRC:false,status:'active',phone:'09211234567'},
+    ]);
+    S.set('users',S.get('scholars',[]).map(s=>({...s,role:'scholar',password:s.firstname.toLowerCase()+'@vho.org'})));
+  }
+  if(!S.get('announcements',[]).length){
+    S.set('announcements',[
+      {id:1,title:'Submission of Report Cards',body:'Please submit your 2nd semester report card by April 30.',category:'Deadline',date:'Apr 5, 2026',image:null,links:[{url:'https://forms.google.com',label:'Submit Here'}]},
+      {id:2,title:'Quarterly Assembly',body:'Attend the assembly on April 15 at VHO Hall, 9AM.',category:'Event',date:'Apr 3, 2026',image:null,links:[]},
+    ]);
+  }
+  if(!S.get('polls',[]).length){
+    S.set('polls',[
+      {id:1,question:'Preferred assembly schedule?',options:['Morning 8–10AM','Afternoon 1–3PM','Evening 5–7PM'],votes:[8,5,2],image:null,active:true},
+      {id:2,question:'Rate the scholarship support so far.',options:['Excellent','Good','Needs Improvement'],votes:[10,9,1],image:null,active:true},
+    ]);
+  }
+  if(!S.get('messages',{})['admin1']){
+    const msgs={};msgs['1']=[{from:'admin',text:'Hi Maria! Please submit your report card.',time:'Apr 5, 9:02 AM'}];
+    S.set('messages',msgs);
+  }
+  if(!S.get('auditlogs',[]).length){
+    S.set('auditlogs',[
+      {dt:'Apr 8, 2026 9:00 AM',user:'Admin',role:'admin',action:'Login',detail:'Admin signed in'},
+      {dt:'Apr 7, 2026 3:22 PM',user:'Admin',role:'admin',action:'Edit Scholar',detail:'Updated GWA of Maria Santos'},
+    ]);
+  }
+}
+
+/* ── NAV ──────────────────────────────────────── */
+function gotoPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  const el=document.getElementById('page-'+page);
+  if(el){el.style.display='block'}
+  document.querySelectorAll('.nav-item,.icon-btn').forEach(n=>{
+    n.classList.toggle('active',n.dataset.page===page);
+  });
+  const titles={dashboard:'Dashboard',scholars:'All Scholars',gwa:'GWA Records',messages:'Messages',announcements:'Announcements',polls:'Polls',notifications:'Notifications',auditlog:'Audit Logs'};
+  document.getElementById('pageTitle').textContent=titles[page]||page;
+  if(page==='scholars')renderScholarsTable();
+  if(page==='gwa')renderGWA();
+  if(page==='messages')renderMsgList();
+  if(page==='announcements')renderAnns();
+  if(page==='polls')renderPolls();
+  if(page==='notifications')renderNotifs();
+  if(page==='auditlog')renderAudit();
+  if(page==='dashboard')renderDash();
+  closeSidebar();
+}
+
+document.querySelectorAll('[data-page]').forEach(el=>{
+  el.addEventListener('click',()=>gotoPage(el.dataset.page));
+});
+
+/* ── SIDEBAR ──────────────────────────────────── */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+/* ── LOGOUT ───────────────────────────────────── */
+function logout(){localStorage.removeItem('vho_role');localStorage.removeItem('vho_current');window.location.href='index.html';}
+
+/* ── SCHOLARS ─────────────────────────────────── */
+function scholars(){return S.get('scholars',[])}
+function activeScholars(){return scholars().filter(s=>s.status==='active')}
+function passingScholars(){return activeScholars().filter(s=>parseFloat(s.gwa)<=2.00)}
+
+function renderDash(){
+  const all=activeScholars();
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat-card blue"><div class="stat-label">Active Scholars</div><div class="stat-val">${all.length}</div><div class="stat-sub">Excl. graduated & inactive</div></div>
+    <div class="stat-card green"><div class="stat-label">Passing GWA</div><div class="stat-val">${passingScholars().length}</div><div class="stat-sub">GWA ≤ 2.00 (85+)</div></div>
+    <div class="stat-card amber"><div class="stat-label">High School</div><div class="stat-val">${all.filter(s=>s.schoolType==='High School').length}</div><div class="stat-sub">Active HS scholars</div></div>
+    <div class="stat-card pink"><div class="stat-label">College</div><div class="stat-val">${all.filter(s=>s.schoolType==='College').length}</div><div class="stat-sub">Active college scholars</div></div>`;
+  const rows=scholars().slice(0,6);
+  document.getElementById('dashTable').innerHTML=rows.map(s=>`<tr>
+    <td><div class="s-info-row"><div class="s-avatar">${initials(s)}</div><div><div class="s-name">${s.firstname} ${s.lastname}</div><div class="s-sub">${s.email}</div></div></div></td>
+    <td>${s.year}</td><td><span class="badge ${s.schoolType==='College'?'badge-blue':'badge-purple'}">${s.schoolType}</span></td>
+    <td><span class="${parseFloat(s.gwa)<=2?'gwa-pass':'gwa-fail'}">${s.gwa}</span></td>
+    <td>${statusBadge(s.status)}</td></tr>`).join('');
+  document.getElementById('dashFeed').innerHTML=S.get('auditlogs',[]).slice(0,8).map(l=>`
+    <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f4f4f8">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:5px"></div>
+      <div><div style="font-size:12.5px">${l.detail}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${l.dt} · ${l.user}</div></div>
+    </div>`).join('');
+}
+
+function renderScholarsTable(){
+  const q=document.getElementById('sSearch').value.toLowerCase();
+  const yr=document.getElementById('sYear').value;
+  const ty=document.getElementById('sType').value;
+  const st=document.getElementById('sStatus').value;
+  const data=scholars().filter(s=>
+    (!q||(s.firstname+' '+s.lastname).toLowerCase().includes(q)||s.email.toLowerCase().includes(q))&&
+    (!yr||s.year===yr)&&(!ty||s.schoolType===ty)&&(!st||s.status===st));
+  document.getElementById('scholarsTable').innerHTML=data.length?data.map(s=>`<tr>
+    <td><div class="s-info-row"><div class="s-avatar">${initials(s)}</div><div><div class="s-name">${s.firstname} ${s.lastname}</div><div class="s-sub">${s.email}</div></div></div></td>
+    <td><span class="badge ${s.schoolType==='College'?'badge-blue':'badge-purple'}">${s.schoolType}</span></td>
+    <td>${s.year}</td><td style="color:var(--muted)">${s.course||'—'}</td>
+    <td><span class="${parseFloat(s.gwa)<=2?'gwa-pass':'gwa-fail'}">${s.gwa||'—'}</span></td>
+    <td>
+      <span class="badge ${s.hasCert?'badge-green':'badge-gray'}" style="margin-right:3px">${s.hasCert?'✓ Cert':'✗ Cert'}</span>
+      <span class="badge ${s.hasRC?'badge-green':'badge-gray'}">${s.hasRC?'✓ RC':'✗ RC'}</span>
+    </td>
+    <td>${statusBadge(s.status)}</td>
+    <td style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="viewScholar(${s.id})">View</button>
+      <button class="btn btn-ghost btn-sm" onclick="openStatusModal(${s.id})">Status</button>
+      <button class="btn btn-ghost btn-sm" onclick="openMsgScholar(${s.id})">Msg</button>
+    </td></tr>`).join(''):`<tr><td colspan="8"><div class="empty"><p>No scholars found.</p></div></td></tr>`;
+}
+
+function renderGWA(){
+  const yr=document.getElementById('gYear').value;
+  const ty=document.getElementById('gType').value;
+  const data=activeScholars().filter(s=>(!yr||s.year===yr)&&(!ty||s.schoolType===ty));
+  document.getElementById('gwaTable').innerHTML=data.map(s=>{
+    const g=parseFloat(s.gwa)||0;const pass=g<=2.00;
+    const pct=Math.min(100,Math.max(0,Math.round(100-((g-1)/4*40))));
+    return`<tr>
+      <td><div class="s-info-row"><div class="s-avatar">${initials(s)}</div><span class="s-name">${s.firstname} ${s.lastname}</span></div></td>
+      <td><span class="badge ${s.schoolType==='College'?'badge-blue':'badge-purple'}">${s.schoolType}</span></td>
+      <td>${s.year}</td>
+      <td><span class="${pass?'gwa-pass':'gwa-fail'}">${s.gwa}</span></td>
+      <td>${pct}%</td>
+      <td style="min-width:100px"><div class="gwa-bar-wrap"><div class="gwa-bar" style="width:${pct}%;background:${pass?'var(--success)':'var(--red)'}"></div></div></td>
+      <td><span class="badge ${pass?'badge-green':'badge-pink'}">${pass?'Passing':'At Risk'}</span></td></tr>`;
+  }).join('');
+}
+
+/* ── MESSAGES ─────────────────────────────────── */
+let currentConvo=null;
+function renderMsgList(){
+  const msgs=S.get('messages',{});
+  document.getElementById('msgList').innerHTML=activeScholars().map(s=>`
+    <div class="msg-list-item ${currentConvo==s.id?'on':''}" onclick="openConvo(${s.id})">
+      <div class="s-avatar">${initials(s)}</div>
+      <div style="min-width:0;flex:1"><div class="s-name" style="font-size:13px">${s.firstname} ${s.lastname}</div>
+      <div class="s-sub">${s.year}</div></div>
+      ${(msgs[s.id]||[]).filter(m=>m.from==='scholar'&&m.unread).length?'<span class="nav-badge">1</span>':''}
+    </div>`).join('');
+  updateMsgBadge();
+}
+function openConvo(id){
+  currentConvo=id;
+  const s=scholars().find(x=>x.id===id);
+  const msgs=S.get('messages',{});
+  document.getElementById('msgHead').innerHTML=`<div class="s-info-row"><div class="s-avatar">${initials(s)}</div><div><div class="card-title">${s.firstname} ${s.lastname}</div><div class="s-sub">${s.year} · ${s.schoolType}</div></div></div>`;
+  const convo=msgs[id]||[];
+  // Mark as read
+  const updated={...msgs,[id]:convo.map(m=>({...m,unread:false}))};
+  S.set('messages',updated);
+  document.getElementById('chatBody').innerHTML=convo.map(m=>`
+    <div style="display:flex;flex-direction:column;align-items:${m.from==='admin'?'flex-end':'flex-start'}">
+      <div class="bubble ${m.from==='admin'?'sent':'recv'}">${m.text}<div class="bubble-time">${m.time}</div></div>
+    </div>`).join('');
+  const cb=document.getElementById('chatBody');cb.scrollTop=cb.scrollHeight;
+  renderMsgList();
+}
+function sendAdminMsg(){
+  const txt=document.getElementById('chatIn').value.trim();
+  if(!txt||!currentConvo)return;
+  const msgs=S.get('messages',{});
+  const convo=msgs[currentConvo]||[];
+  convo.push({from:'admin',text:txt,time:nowStr(),unread:false});
+  S.set('messages',{...msgs,[currentConvo]:convo});
+  addAudit('Admin','admin','Message Sent',`Sent message to scholar ID ${currentConvo}`);
+  document.getElementById('chatIn').value='';
+  openConvo(currentConvo);
+  toast('Message sent','✉️');
+}
+function openMsgScholar(id){gotoPage('messages');setTimeout(()=>openConvo(id),80);}
+function updateMsgBadge(){
+  const msgs=S.get('messages',{});
+  const unread=Object.values(msgs).flat().filter(m=>m.from==='scholar'&&m.unread).length;
+  const el=document.getElementById('nb-messages');
+  el.style.display=unread?'':'none';if(unread)el.textContent=unread;
+}
+
+/* ── ANNOUNCEMENTS ────────────────────────────── */
+let annLinks=[];
+function renderAnns(){
+  const list=S.get('announcements',[]);
+  const catColor={General:['badge-blue','var(--blue)'],Important:['badge-pink','var(--red)'],Deadline:['badge-amber','var(--warn)'],Event:['badge-green','var(--success)']};
+  document.getElementById('annList').innerHTML=list.length?list.map(a=>`
+    <div class="ann-card">
+      ${a.image?`<img class="ann-img" src="${a.image}" alt="">`:''}
+      <div class="ann-body">
+        <div class="ann-meta">
+          <span class="badge ${(catColor[a.category]||catColor.General)[0]}">${a.category}</span>
+          <span style="font-size:11px;color:var(--muted)">${a.date}</span>
+        </div>
+        <div class="ann-title">${a.title}</div>
+        <div class="ann-text">${a.body}</div>
+        ${(a.links||[]).map(l=>`<a class="ann-link" href="${l.url}" target="_blank"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>${l.label||l.url}</a>`).join('')}
+        <div style="margin-top:12px;display:flex;gap:6px">
+          <button class="btn btn-danger btn-sm" onclick="deleteAnn(${a.id})">Delete</button>
+        </div>
+      </div>
+    </div>`).join(''):`<div class="empty"><h3>No announcements yet</h3><p>Create one to notify all scholars.</p></div>`;
+}
+function addAnnLink(){
+  const url=document.getElementById('a_linkUrl').value.trim();
+  const label=document.getElementById('a_linkLabel').value.trim()||url;
+  if(!url)return;
+  annLinks.push({url,label});
+  document.getElementById('a_linkUrl').value='';document.getElementById('a_linkLabel').value='';
+  renderAnnLinksPreview();
+}
+function renderAnnLinksPreview(){
+  document.getElementById('a_linksPreview').innerHTML=annLinks.map((l,i)=>
+    `<span class="link-chip">${l.label}<button onclick="annLinks.splice(${i},1);renderAnnLinksPreview()">✕</button></span>`).join('');
+}
+function postAnn(){
+  const title=document.getElementById('a_title').value.trim();
+  const body=document.getElementById('a_body').value.trim();
+  const category=document.getElementById('a_cat').value;
+  const imgEl=document.getElementById('a_img_prevImg');
+  const image=imgEl.src&&imgEl.src!==window.location.href?imgEl.src:null;
+  if(!title||!body){toast('Please fill title and message','⚠️');return}
+  const list=S.get('announcements',[]);
+  const newAnn={id:Date.now(),title,body,category,date:todayStr(),image,links:[...annLinks]};
+  list.unshift(newAnn);S.set('announcements',list);
+  addNotif('admin','📣',`New Announcement: ${title}`,category,todayStr());
+  addAudit('Admin','admin','Announcement',`Posted: ${title}`);
+  annLinks=[];renderAnnLinksPreview();
+  document.getElementById('a_title').value='';document.getElementById('a_body').value='';
+  document.getElementById('a_img_prevImg').src='';document.getElementById('a_img_prev').style.display='none';
+  closeModal('mAnn');renderAnns();toast('Announcement posted!','📣');
+}
+function deleteAnn(id){
+  S.set('announcements',S.get('announcements',[]).filter(a=>a.id!==id));
+  renderAnns();addAudit('Admin','admin','Delete Announcement',`Removed announcement ID ${id}`);
+}
+
+/* ── POLLS ────────────────────────────────────── */
+function renderPolls(){
+  const list=S.get('polls',[]);
+  document.getElementById('pollList').innerHTML=list.length?list.map(p=>{
+    const total=p.votes.reduce((a,b)=>a+b,0);
+    return`<div class="poll-card">
+      ${p.image?`<img class="poll-img" src="${p.image}" alt="">`:''}
+      <div class="poll-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:12px">
+          <div class="poll-question">${p.question}</div>
+          <span class="badge ${p.active?'badge-green':'badge-gray'}">${p.active?'Active':'Closed'}</span>
+        </div>
+        ${p.options.map((o,i)=>`
+          <div class="poll-result-row">
+            <div class="poll-result-label"><span>${o}</span><span>${p.votes[i]} (${total?Math.round(p.votes[i]/total*100):0}%)</span></div>
+            <div class="poll-bar-outer"><div class="poll-bar-inner" style="width:${total?p.votes[i]/total*100:0}%"></div></div>
+          </div>`).join('')}
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:6px">
+          <span style="font-size:12px;color:var(--muted)">${total} total responses</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-amber btn-sm" onclick="togglePoll(${p.id})">${p.active?'Close Poll':'Reopen'}</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePoll(${p.id})">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):`<div class="empty"><h3>No polls yet</h3><p>Create a poll to get scholar feedback.</p></div>`;
+}
+function createPoll(){
+  const q=document.getElementById('p_q').value.trim();
+  const opts=document.getElementById('p_opts').value.trim().split('\n').map(x=>x.trim()).filter(Boolean);
+  const imgEl=document.getElementById('p_img_prevImg');
+  const image=imgEl.src&&imgEl.src!==window.location.href?imgEl.src:null;
+  if(!q||opts.length<2){toast('Need a question and 2+ options','⚠️');return}
+  const list=S.get('polls',[]);
+  list.unshift({id:Date.now(),question:q,options:opts,votes:opts.map(()=>0),image,active:true});
+  S.set('polls',list);
+  addNotif('admin','📋',`New Poll: ${q}`,'Poll',todayStr());
+  addAudit('Admin','admin','Poll Created',q);
+  document.getElementById('p_q').value='';document.getElementById('p_opts').value='';
+  document.getElementById('p_img_prevImg').src='';document.getElementById('p_img_prev').style.display='none';
+  closeModal('mPoll');renderPolls();toast('Poll created!','📊');
+}
+function togglePoll(id){
+  S.set('polls',S.get('polls',[]).map(p=>p.id===id?{...p,active:!p.active}:p));renderPolls();
+}
+function deletePoll(id){S.set('polls',S.get('polls',[]).filter(p=>p.id!==id));renderPolls();}
+
+/* ── ADD SCHOLAR ──────────────────────────────── */
+function updateYearOpts(){
+  const type=document.getElementById('f_stype').value;
+  const hs=['Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'];
+  const col=['1st Year College','2nd Year College','3rd Year College','4th Year College'];
+  const opts=type==='High School'?hs:col;
+  document.getElementById('f_year').innerHTML=opts.map(o=>`<option>${o}</option>`).join('');
+}
+function addScholar(){
+  const fn=document.getElementById('f_fn').value.trim();
+  const ln=document.getElementById('f_ln').value.trim();
+  const em=document.getElementById('f_em').value.trim();
+  const stype=document.getElementById('f_stype').value;
+  const year=document.getElementById('f_year').value;
+  const course=document.getElementById('f_course').value.trim();
+  const school=document.getElementById('f_school').value.trim();
+  const gwa=document.getElementById('f_gwa').value.trim();
+  const phone=document.getElementById('f_phone').value.trim();
+  if(!fn||!ln||!em){toast('First name, last name, and email are required','⚠️');return}
+  const list=scholars();
+  const id=Date.now();
+  const newS={id,firstname:fn,lastname:ln,email:em,schoolType:stype,year,course,school,gwa:gwa||'—',hasCert:false,hasRC:false,status:'active',phone};
+  list.push(newS);S.set('scholars',list);
+  const users=S.get('users',[]);users.push({...newS,role:'scholar',password:fn.toLowerCase()+'@vho.org'});S.set('users',users);
+  addAudit('Admin','admin','Add Scholar',`Added ${fn} ${ln}`);
+  closeModal('mAddScholar');renderScholarsTable();renderDash();
+  toast(`${fn} ${ln} added!`,'🎓');
+  document.getElementById('f_fn').value='';document.getElementById('f_ln').value='';document.getElementById('f_em').value='';document.getElementById('f_gwa').value='';document.getElementById('f_course').value='';document.getElementById('f_school').value='';document.getElementById('f_phone').value='';
+}
+
+/* ── SCHOLAR STATUS ───────────────────────────── */
+let editingStatusId=null;
+function openStatusModal(id){
+  editingStatusId=id;
+  const s=scholars().find(x=>x.id===id);
+  document.getElementById('statusModalSub').textContent=`Update status for ${s.firstname} ${s.lastname}`;
+  document.getElementById('statusSelect').value=s.status;
+  document.getElementById('statusReason').value='';
+  openModal('mStatus');
+}
+function saveStatus(){
+  const status=document.getElementById('statusSelect').value;
+  const reason=document.getElementById('statusReason').value.trim();
+  const list=scholars().map(s=>s.id===editingStatusId?{...s,status}:s);
+  S.set('scholars',list);
+  const s=scholars().find(x=>x.id===editingStatusId);
+  addAudit('Admin','admin','Status Change',`${s.firstname} ${s.lastname} → ${status}${reason?' ('+reason+')':''}`);
+  closeModal('mStatus');renderScholarsTable();renderDash();
+  toast(`Status updated to: ${status}`,'✅');
+}
+
+/* ── SCHOLAR DETAIL ───────────────────────────── */
+function viewScholar(id){
+  const s=scholars().find(x=>x.id===id);
+  const pass=parseFloat(s.gwa)<=2.00;
+  const statusColors={active:'badge-green',graduated:'badge-purple',inactive:'badge-gray'};
+  document.getElementById('mScholarDetailBody').innerHTML=`
+    <button class="modal-close" onclick="closeModal('mScholarDetail')">✕</button>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--pink2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--blue2)">${initials(s)}</div>
+      <div><h2 class="modal-title" style="margin-bottom:2px">${s.firstname} ${s.lastname}</h2><p style="font-size:13px;color:var(--muted)">${s.email}</p></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      ${[['School Type',`<span class="badge ${s.schoolType==='College'?'badge-blue':'badge-purple'}">${s.schoolType}</span>`],['Year/Grade',s.year],['Course/Strand',s.course||'—'],['School',s.school||'—'],['GWA',`<span class="${pass?'gwa-pass':'gwa-fail'}">${s.gwa}</span>`],['Phone',s.phone||'—'],['Status',`<span class="badge ${statusColors[s.status]||'badge-gray'}">${s.status}</span>`]].map(([k,v])=>
+        `<div style="background:#fafafa;border-radius:9px;padding:11px 14px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px">${k}</div><div style="font-size:14px">${v}</div></div>`).join('')}
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">Documents</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="badge ${s.hasCert?'badge-green':'badge-gray'}">${s.hasCert?'✓':'✗'} Registration/Certificate</span>
+        <span class="badge ${s.hasRC?'badge-green':'badge-gray'}">${s.hasRC?'✓':'✗'} Report Card</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('mScholarDetail')">Close</button>
+      <button class="btn btn-amber btn-sm" onclick="closeModal('mScholarDetail');openStatusModal(${s.id})">Change Status</button>
+      <button class="btn btn-primary" onclick="closeModal('mScholarDetail');openMsgScholar(${s.id})">Message</button>
+    </div>`;
+  openModal('mScholarDetail');
+}
+
+/* ── NOTIFICATIONS ────────────────────────────── */
+function addNotif(target,icon,text,type,date){
+  const list=S.get('notifs',[]);
+  list.unshift({id:Date.now(),target,icon,text,type,date,read:false});
+  S.set('notifs',list);
+  updateNotifBadge();
+}
+function renderNotifs(){
+  const list=S.get('notifs',[]).filter(n=>n.target==='admin');
+  document.getElementById('notifList').innerHTML=list.length?list.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}">
+      <div class="n-icon n-blue">${n.icon}</div>
+      <div style="flex:1"><div class="notif-text"><strong>${n.text}</strong></div><div class="notif-time">${n.date}</div></div>
+      ${!n.read?'<div style="width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:4px"></div>':''}
+    </div>`).join(''):`<div class="empty"><h3>No notifications</h3></div>`;
+  S.set('notifs',S.get('notifs',[]).map(n=>({...n,read:true})));
+  updateNotifBadge();
+}
+function updateNotifBadge(){
+  const count=S.get('notifs',[]).filter(n=>n.target==='admin'&&!n.read).length;
+  const el=document.getElementById('nb-notifications');
+  el.style.display=count?'':'none';if(count)el.textContent=count;
+  document.getElementById('topNotifDot').style.display=count?'block':'none';
+}
+function clearNotifs(){S.set('notifs',S.get('notifs',[]).map(n=>({...n,read:true})));renderNotifs();}
+
+/* ── AUDIT LOG ────────────────────────────────── */
+function addAudit(user,role,action,detail){
+  const list=S.get('auditlogs',[]);
+  list.unshift({dt:nowStr(),user,role,action,detail});
+  S.set('auditlogs',list);
+}
+function renderAudit(){
+  const list=S.get('auditlogs',[]);
+  document.getElementById('auditTable').innerHTML=list.map(l=>`<tr>
+    <td style="font-size:11px;color:var(--muted);white-space:nowrap">${l.dt}</td>
+    <td><div class="s-name" style="font-size:13px">${l.user}</div></td>
+    <td><span class="badge ${l.role==='admin'?'badge-blue':'badge-pink'}">${l.role}</span></td>
+    <td><span class="audit-action">${l.action}</span></td>
+    <td style="font-size:12px;color:var(--muted)">${l.detail}</td></tr>`).join('');
+}
+
+/* ── EXPORT ───────────────────────────────────── */
+function exportPDF(){
+  toast('Generating export…','📄');
+  setTimeout(()=>{
+    const rows=scholars().map(s=>`${s.firstname} ${s.lastname}\t${s.schoolType}\t${s.year}\t${s.course||'—'}\t${s.gwa}\t${s.status}`).join('\n');
+    const txt=`VHO SCHOLARSHIP MANAGEMENT SYSTEM\nScholar Export – ${todayStr()}\n\nNAME\tSCHOOL TYPE\tYEAR LEVEL\tCOURSE\tGWA\tSTATUS\n${rows}`;
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='VHO_Scholars_Export.txt';a.click();
+    toast('Export downloaded!','✅');
+    addAudit('Admin','admin','Export','Exported scholar list');
+  },600);
+}
+
+/* ── HELPERS ──────────────────────────────────── */
+function statusBadge(s){const m={active:'badge-green',graduated:'badge-purple',inactive:'badge-gray'};return`<span class="badge ${m[s]||'badge-gray'}">${s}</span>`}
+function initials(s){return(s.firstname[0]+(s.lastname[0]||'')).toUpperCase()}
+function nowStr(){return new Date().toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function todayStr(){return new Date().toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function previewImg(inputId,wrapId){
+  const file=document.getElementById(inputId).files[0];if(!file)return;
+  const reader=new FileReader();reader.onload=e=>{
+    document.getElementById(wrapId+'Img').src=e.target.result;
+    document.getElementById(wrapId).style.display='block';
+  };reader.readAsDataURL(file);
+}
+function toast(msg,icon='ℹ️'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span class="toast-icon">${icon}</span><div><strong>${msg}</strong></div>`;
+  c.appendChild(t);setTimeout(()=>t.remove(),3500);
+}
+
+/* ── BOOT ─────────────────────────────────────── */
+window.onload=()=>{
+  if(localStorage.getItem('vho_role')!=='admin'){window.location.href='index.html';return}
+  initData();updateYearOpts();renderDash();updateNotifBadge();updateMsgBadge();
+};
+</script>
+</body>
+</html>

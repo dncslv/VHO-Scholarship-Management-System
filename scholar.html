@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholar – VHO SMS</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.quick-btn{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text)}
+.quick-btn:hover{border-color:var(--blue);background:var(--blue-pale);transform:translateY(-2px)}
+.quick-btn .qicon{font-size:24px;margin-bottom:8px}
+.quick-btn .qlabel{font-size:13px;font-weight:500}
+.gwa-circle{width:120px;height:120px;border-radius:50%;border:6px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 14px;position:relative}
+.gwa-num{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;line-height:1}
+.gwa-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.doc-upload-card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:12px}
+.doc-upload-card h3{font-size:15px;font-weight:500;margin-bottom:4px}
+.doc-upload-card p{font-size:12px;color:var(--muted);margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 30 30"><path d="M15 26s-11-7-11-14a7 7 0 0 1 11-5.7A7 7 0 0 1 26 12c0 7-11 14-11 14z" fill="#e05065"/><path d="M15 26s0-7 0-14a7 7 0 0 1 11-5.7C26 12 15 26 15 26z" fill="#a83248"/></svg>
+    <div class="logo-text">Victoria Heartstrong<span>Organization</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">My Account</div>
+    <a class="nav-item active" data-page="home">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 0 0-1.414 0l-7 7A1 1 0 0 0 3 11h1v6a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3h2v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-6h1a1 1 0 0 0 .707-1.707l-7-7z"/></svg>Home</a>
+    <a class="nav-item" data-page="gwa">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 11h2v5H2zm4-4h2v9H6zm4-3h2v12h-2zm4 5h2v7h-2z"/></svg>My GWA</a>
+    <a class="nav-item" data-page="documents">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 0 1 2-2h4.586A2 2 0 0 1 12 2.586L15.414 6A2 2 0 0 1 16 7.414V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm2 6a1 1 0 0 1 1-1h6a1 1 0 0 1 0 2H7a1 1 0 0 1-1-1zm1 3a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2H7z"/></svg>Documents</a>
+    <div class="nav-group-label">Community</div>
+    <a class="nav-item" data-page="announcements">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zm0 16a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z"/></svg>Announcements<span class="nav-badge" id="nb-ann" style="display:none">0</span></a>
+    <a class="nav-item" data-page="polls">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 0 0 0 2h2a1 1 0 0 0 0-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 0 1 2-2 3 3 0 0 0 3 3h2a3 3 0 0 0 3-3 2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5z"/></svg>Polls<span class="nav-badge" id="nb-polls" style="display:none">0</span></a>
+    <a class="nav-item" data-page="messages">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4l-4 4V5z"/></svg>Message Admin<span class="nav-badge" id="nb-msgs" style="display:none">0</span></a>
+    <a class="nav-item" data-page="notifications">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zm0 16a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z"/></svg>Notifications<span class="nav-badge" id="nb-notifs" style="display:none">0</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip" onclick="logout()">
+      <div class="avatar" id="avatarEl">MS</div>
+      <div class="user-info"><div class="user-name" id="nameEl">Scholar</div><div class="user-role" id="roleEl">Scholar</div></div>
+      <svg width="14" height="14" fill="rgba(255,255,255,.4)" viewBox="0 0 20 20"><path d="M3 3a1 1 0 0 0 0 2h11.586l-2.293 2.293a1 1 0 1 0 1.414 1.414l4-4a1 1 0 0 0 0-1.414l-4-4a1 1 0 1 0-1.414 1.414L14.586 3H3z"/></svg>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <span class="topbar-title" id="pageTitle">Home</span>
+    </div>
+    <div class="topbar-right">
+      <a class="icon-btn" data-page="notifications" style="position:relative">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 0 0-6 6v3.586l-.707.707A1 1 0 0 0 4 14h12a1 1 0 0 0 .707-1.707L16 11.586V8a6 6 0 0 0-6-6zm0 16a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z"/></svg>
+        <span class="notif-dot" id="topDot" style="display:none"></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- HOME -->
+    <div id="page-home" class="page">
+      <div class="page-header"><div class="page-header-left"><h1 id="homeGreet">Welcome back ♥</h1><p id="homeSubtitle">Loading…</p></div></div>
+      <div class="stat-grid" id="homeStats"></div>
+      <div class="quick-grid">
+        <div class="quick-btn" data-page="gwa"><div class="qicon">📊</div><div class="qlabel">Update GWA</div></div>
+        <div class="quick-btn" data-page="documents"><div class="qicon">📄</div><div class="qlabel">Upload Docs</div></div>
+        <div class="quick-btn" data-page="polls"><div class="qicon">📋</div><div class="qlabel">Answer Polls</div></div>
+        <div class="quick-btn" data-page="messages"><div class="qicon">💬</div><div class="qlabel">Message Admin</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Latest Announcements</span><a class="btn btn-ghost btn-sm" data-page="announcements">See all</a></div>
+        <div class="card-body" id="homeAnns"></div>
+      </div>
+    </div>
+
+    <!-- GWA -->
+    <div id="page-gwa" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>My GWA</h1><p>Track your academic performance. Passing: GWA ≤ 2.00 (85+)</p></div></div>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start">
+        <div class="card">
+          <div class="card-body" style="text-align:center;padding:28px 20px">
+            <div class="gwa-circle" id="gwaCircle">
+              <div class="gwa-num" id="gwaNum">—</div>
+              <div class="gwa-lbl">GWA</div>
+            </div>
+            <div id="gwaStatusBadge"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><span class="card-title">Submit GWA</span></div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-field"><label class="form-label">GWA (1.00 – 5.00)*</label><input class="form-input" id="gwaIn" type="number" step="0.01" min="1" max="5" placeholder="e.g. 1.75"></div>
+                <div class="form-field"><label class="form-label">Semester</label>
+                  <select class="form-select" id="gwaSem">
+                    <option>2nd Semester A.Y. 2025–2026</option>
+                    <option>1st Semester A.Y. 2025–2026</option>
+                    <option>Summer A.Y. 2025–2026</option>
+                  </select></div>
+              </div>
+              <button class="btn btn-primary" onclick="submitGwa()" style="width:100%;justify-content:center">Save GWA</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">GWA History</span></div>
+            <div class="table-wrap"><table><thead><tr><th>Semester</th><th>GWA</th><th>Status</th><th>Date</th></tr></thead><tbody id="gwaHistory"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div id="page-documents" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>Documents</h1><p>Upload your required scholarship documents (PDF only)</p></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="doc-upload-card">
+          <h3>Registration / Certificate</h3>
+          <p>Upload your registration form or scholarship certificate.</p>
+          <div id="certBadge" style="margin-bottom:12px"></div>
+          <div class="upload-zone" onclick="document.getElementById('up_cert').click()">
+            <svg width="28" height="28" fill="none" stroke="var(--light)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <p><strong>Click to upload</strong> PDF</p>
+          </div>
+          <input type="file" id="up_cert" accept=".pdf" style="display:none" onchange="handleUpload('cert',this)">
+        </div>
+        <div class="doc-upload-card">
+          <h3>Report Card</h3>
+          <p>Upload your latest report card or grade sheet.</p>
+          <div id="rcBadge" style="margin-bottom:12px"></div>
+          <div class="upload-zone" onclick="document.getElementById('up_rc').click()">
+            <svg width="28" height="28" fill="none" stroke="var(--light)" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <p><strong>Click to upload</strong> PDF</p>
+          </div>
+          <input type="file" id="up_rc" accept=".pdf" style="display:none" onchange="handleUpload('rc',this)">
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="card-header"><span class="card-title">Upload History</span></div>
+        <div class="table-wrap"><table><thead><tr><th>File Name</th><th>Type</th><th>Date</th><th>Status</th></tr></thead><tbody id="docHistory"></tbody></table></div>
+      </div>
+      <!-- Announcement links section -->
+      <div class="card" style="margin-top:14px">
+        <div class="card-header"><span class="card-title">Admin Document Links</span></div>
+        <div class="card-body" id="docLinks">
+          <p style="font-size:13px;color:var(--muted)">Document submission links from admin will appear here.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANNOUNCEMENTS -->
+    <div id="page-announcements" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>Announcements</h1><p>Updates from VHO</p></div></div>
+      <div id="annList"></div>
+    </div>
+
+    <!-- POLLS -->
+    <div id="page-polls" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>Polls</h1><p>Share your opinion with VHO</p></div></div>
+      <div id="pollList" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div id="page-messages" class="page" style="display:none">
+      <div class="page-header"><div class="page-header-left"><h1>Message Admin</h1><p>Send a message to your scholarship coordinator</p></div></div>
+      <div class="card" style="max-width:640px">
+        <div class="card-header">
+          <div class="s-info-row">
+            <div class="avatar" style="background:var(--blue)">A</div>
+            <div><div style="font-size:14px;font-weight:500">Scholarship Coordinator</div><div style="font-size:11px;color:var(--success)">● Available</div></div>
+          </div>
+        </div>
+        <div class="chat-body" id="chatBody" style="min-height:300px"></div>
+        <div class="chat-input-row">
+          <input id="chatIn" placeholder="Type your message…" onkeydown="if(event.key==='Enter')sendScholarMsg()">
+          <button class="btn btn-primary" onclick="sendScholarMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="page-notifications" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-header-left"><h1>Notifications</h1><p>All your alerts and updates</p></div>
+        <button class="btn btn-ghost btn-sm" onclick="clearNotifs()">Mark all read</button>
+      </div>
+      <div class="card"><div class="card-body" id="notifList"></div></div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const S={get:(k,d)=>JSON.parse(localStorage.getItem('vho_'+k)||JSON.stringify(d)),set:(k,v)=>localStorage.setItem('vho_'+k,JSON.stringify(v))};
+let currentUser=null;
+
+/* ── BOOT ─────────────────────────────────────── */
+window.onload=()=>{
+  if(localStorage.getItem('vho_role')!=='scholar'){window.location.href='index.html';return}
+  currentUser=JSON.parse(localStorage.getItem('vho_current')||'null');
+  if(!currentUser){window.location.href='index.html';return}
+  // Sync from scholars table
+  const scholars=S.get('scholars',[]);
+  currentUser={...scholars.find(s=>s.id===currentUser.id)||currentUser};
+  setupUI();renderHome();updateBadges();
+};
+
+function setupUI(){
+  const initials=(currentUser.firstname[0]+(currentUser.lastname?currentUser.lastname[0]:'')).toUpperCase();
+  document.getElementById('avatarEl').textContent=initials;
+  document.getElementById('nameEl').textContent=`${currentUser.firstname} ${currentUser.lastname||''}`;
+  document.getElementById('roleEl').textContent=`${currentUser.schoolType||'Scholar'} · ${currentUser.year||''}`;
+}
+
+/* ── NAV ──────────────────────────────────────── */
+function gotoPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  document.getElementById('page-'+page).style.display='block';
+  document.querySelectorAll('.nav-item,.icon-btn,.quick-btn').forEach(n=>n.classList.toggle('active',n.dataset.page===page));
+  const titles={home:'Home',gwa:'My GWA',documents:'Documents',announcements:'Announcements',polls:'Polls',messages:'Message Admin',notifications:'Notifications'};
+  document.getElementById('pageTitle').textContent=titles[page]||page;
+  if(page==='home')renderHome();
+  if(page==='gwa')renderGWA();
+  if(page==='documents')renderDocs();
+  if(page==='announcements'){renderAnns();markAnnRead();}
+  if(page==='polls'){renderPolls();markPollsRead();}
+  if(page==='messages'){renderChat();markMsgRead();}
+  if(page==='notifications')renderNotifs();
+  closeSidebar();
+}
+document.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>gotoPage(el.dataset.page)));
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+function logout(){localStorage.removeItem('vho_role');localStorage.removeItem('vho_current');window.location.href='index.html';}
+
+/* ── HOME ─────────────────────────────────────── */
+function renderHome(){
+  const s=currentUser;
+  const pass=parseFloat(s.gwa)<=2.00;
+  document.getElementById('homeGreet').textContent=`Welcome back, ${s.firstname} ♥`;
+  document.getElementById('homeSubtitle').textContent=`${s.year||''} Scholar · ${s.course||''} · ${s.school||''}`;
+  const unanswered=S.get('polls',[]).filter(p=>p.active&&!answeredPolls().includes(p.id)).length;
+  const unreadMsgs=getMyMessages().filter(m=>m.from==='admin'&&m.unread).length;
+  document.getElementById('homeStats').innerHTML=`
+    <div class="stat-card blue"><div class="stat-label">Current GWA</div><div class="stat-val" style="color:${pass?'var(--success)':'var(--red)'};">${s.gwa||'—'}</div><div class="stat-sub">${s.gwa?(pass?'✓ Passing':'⚠ At Risk'):'Not yet submitted'}</div></div>
+    <div class="stat-card green"><div class="stat-label">Documents</div><div class="stat-val">${(s.hasCert?1:0)+(s.hasRC?1:0)}/2</div><div class="stat-sub">${s.hasCert&&s.hasRC?'All complete':'Pending upload'}</div></div>
+    <div class="stat-card amber"><div class="stat-label">Unanswered Polls</div><div class="stat-val">${unanswered}</div><div class="stat-sub">${unanswered?'Please respond':'All done!'}</div></div>
+    <div class="stat-card pink"><div class="stat-label">New Messages</div><div class="stat-val">${unreadMsgs}</div><div class="stat-sub">${unreadMsgs?'Check messages':'No new messages'}</div></div>`;
+  const anns=S.get('announcements',[]).slice(0,2);
+  const catC={General:'badge-blue',Important:'badge-pink',Deadline:'badge-amber',Event:'badge-green'};
+  document.getElementById('homeAnns').innerHTML=anns.map(a=>`
+    <div style="border-left:3px solid var(--blue);padding-left:14px;margin-bottom:14px">
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+        <span class="badge ${catC[a.category]||'badge-blue'}">${a.category}</span>
+        <span style="font-size:11px;color:var(--muted)">${a.date}</span>
+      </div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:3px">${a.title}</div>
+      <div style="font-size:12px;color:var(--muted)">${a.body.slice(0,100)}${a.body.length>100?'…':''}</div>
+    </div>`).join('')||'<p style="font-size:13px;color:var(--muted)">No announcements yet.</p>';
+}
+
+/* ── GWA ──────────────────────────────────────── */
+function renderGWA(){
+  const gwa=currentUser.gwa&&currentUser.gwa!=='—'?parseFloat(currentUser.gwa):null;
+  document.getElementById('gwaNum').textContent=gwa?gwa.toFixed(2):'—';
+  if(gwa){
+    const pass=gwa<=2.00;
+    document.getElementById('gwaCircle').style.borderColor=pass?'var(--success)':'var(--red)';
+    document.getElementById('gwaStatusBadge').innerHTML=`<span class="badge ${pass?'badge-green':'badge-pink'}" style="font-size:12px;padding:5px 12px">${pass?'✓ Passing':'⚠ At Risk'}</span>`;
+  }
+  const hist=S.get('gwaHistory_'+currentUser.id,[]);
+  document.getElementById('gwaHistory').innerHTML=hist.map(h=>`<tr>
+    <td style="font-size:13px">${h.sem}</td>
+    <td><span class="${parseFloat(h.gwa)<=2?'gwa-pass':'gwa-fail'}">${h.gwa}</span></td>
+    <td><span class="badge ${parseFloat(h.gwa)<=2?'badge-green':'badge-pink'}">${parseFloat(h.gwa)<=2?'Passing':'At Risk'}</span></td>
+    <td style="font-size:11px;color:var(--muted)">${h.date}</td></tr>`).join('')||'<tr><td colspan="4"><div class="empty"><p>No GWA records yet.</p></div></td></tr>';
+}
+function submitGwa(){
+  const val=parseFloat(document.getElementById('gwaIn').value);
+  const sem=document.getElementById('gwaSem').value;
+  if(!val||val<1||val>5){toast('Enter a valid GWA (1.00–5.00)','⚠️');return}
+  // Update scholar
+  const scholars=S.get('scholars',[]).map(s=>s.id===currentUser.id?{...s,gwa:val.toFixed(2)}:s);
+  S.set('scholars',scholars);
+  currentUser.gwa=val.toFixed(2);localStorage.setItem('vho_current',JSON.stringify(currentUser));
+  // Save history
+  const hist=S.get('gwaHistory_'+currentUser.id,[]);
+  hist.unshift({gwa:val.toFixed(2),sem,date:todayStr()});
+  S.set('gwaHistory_'+currentUser.id,hist);
+  // Notify admin
+  addAdminNotif('📊',`${currentUser.firstname} updated GWA: ${val.toFixed(2)}`,'GWA Update');
+  renderGWA();renderHome();toast('GWA saved!','📊');
+}
+
+/* ── DOCUMENTS ────────────────────────────────── */
+function renderDocs(){
+  const s=S.get('scholars',[]).find(x=>x.id===currentUser.id)||currentUser;
+  document.getElementById('certBadge').innerHTML=s.hasCert?'<span class="badge badge-green">✓ Certificate uploaded</span>':'<span class="badge badge-gray">Not uploaded</span>';
+  document.getElementById('rcBadge').innerHTML=s.hasRC?'<span class="badge badge-green">✓ Report card uploaded</span>':'<span class="badge badge-gray">Not uploaded</span>';
+  const hist=S.get('docHistory_'+currentUser.id,[]);
+  document.getElementById('docHistory').innerHTML=hist.map(d=>`<tr>
+    <td style="font-size:13px">${d.name}</td>
+    <td><span class="badge badge-blue">${d.type}</span></td>
+    <td style="font-size:11px;color:var(--muted)">${d.date}</td>
+    <td><span class="badge badge-amber">Pending Review</span></td></tr>`).join('')||'<tr><td colspan="4"><div class="empty"><p>No uploads yet.</p></div></td></tr>';
+  // Show announcement links
+  const links=S.get('announcements',[]).flatMap(a=>(a.links||[]).map(l=>({...l,from:a.title})));
+  if(links.length){
+    document.getElementById('docLinks').innerHTML=links.map(l=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f4f4f8">
+        <svg width="14" height="14" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <div><a href="${l.url}" target="_blank" style="font-size:13px;font-weight:500;color:var(--blue);text-decoration:none">${l.label}</a><div style="font-size:11px;color:var(--muted)">From: ${l.from}</div></div>
+      </div>`).join('');
+  }
+}
+function handleUpload(type,input){
+  if(!input.files.length)return;
+  const file=input.files[0];
+  if(!file.name.toLowerCase().endsWith('.pdf')){toast('Only PDF files are accepted','⚠️');return}
+  const scholars=S.get('scholars',[]).map(s=>s.id===currentUser.id?{...s,[type==='cert'?'hasCert':'hasRC']:true}:s);
+  S.set('scholars',scholars);currentUser[type==='cert'?'hasCert':'hasRC']=true;
+  const hist=S.get('docHistory_'+currentUser.id,[]);
+  hist.unshift({name:file.name,type:type==='cert'?'Certificate':'Report Card',date:todayStr()});
+  S.set('docHistory_'+currentUser.id,hist);
+  addAdminNotif('📄',`${currentUser.firstname} uploaded ${type==='cert'?'Certificate':'Report Card'}:`+file.name,'Document');
+  renderDocs();renderHome();toast(`${file.name} uploaded!`,'📄');
+}
+
+/* ── ANNOUNCEMENTS ────────────────────────────── */
+function renderAnns(){
+  const list=S.get('announcements',[]);
+  const catC={General:'badge-blue',Important:'badge-pink',Deadline:'badge-amber',Event:'badge-green'};
+  document.getElementById('annList').innerHTML=list.length?list.map(a=>`
+    <div class="ann-card">
+      ${a.image?`<img class="ann-img" src="${a.image}" alt="">`:''}
+      <div class="ann-body">
+        <div class="ann-meta">
+          <span class="badge ${catC[a.category]||'badge-blue'}">${a.category}</span>
+          <span style="font-size:11px;color:var(--muted)">${a.date}</span>
+        </div>
+        <div class="ann-title">${a.title}</div>
+        <div class="ann-text">${a.body}</div>
+        ${(a.links||[]).map(l=>`<a class="ann-link" href="${l.url}" target="_blank"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>${l.label||l.url}</a>`).join('')}
+      </div>
+    </div>`).join(''):`<div class="empty"><h3>No announcements</h3><p>Check back later.</p></div>`;
+}
+function markAnnRead(){
+  const seen=S.get('seenAnns_'+currentUser.id,[]);
+  S.get('announcements',[]).forEach(a=>{if(!seen.includes(a.id))seen.push(a.id)});
+  S.set('seenAnns_'+currentUser.id,seen);updateBadges();
+}
+
+/* ── POLLS ────────────────────────────────────── */
+function answeredPolls(){return S.get('answeredPolls_'+currentUser.id,[]);}
+function renderPolls(){
+  const list=S.get('polls',[]);
+  const answered=answeredPolls();
+  document.getElementById('pollList').innerHTML=list.length?list.map(p=>{
+    const isDone=answered.find(a=>a.id===p.id);
+    const total=p.votes.reduce((a,b)=>a+b,0);
+    return`<div class="poll-card">
+      ${p.image?`<img class="poll-img" src="${p.image}" alt="">`:''}
+      <div class="poll-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:14px">
+          <div class="poll-question">${p.question}</div>
+          <span class="badge ${p.active?'badge-green':'badge-gray'}">${p.active?'Active':'Closed'}</span>
+        </div>
+        ${isDone||!p.active?
+          p.options.map((o,i)=>`
+            <div style="margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                <span${isDone&&isDone.answer===o?' style="font-weight:500;color:var(--blue2)"':''}>${o}${isDone&&isDone.answer===o?' ✓':''}</span>
+                <span style="color:var(--muted)">${total?Math.round(p.votes[i]/total*100):0}%</span>
+              </div>
+              <div class="poll-bar-outer"><div class="poll-bar-inner" style="width:${total?p.votes[i]/total*100:0}%"></div></div>
+            </div>`).join(''):
+          p.options.map((o,i)=>`<button class="poll-opt" onclick="answerPoll(${p.id},${i},'${o.replace(/'/g,'\\'')}',this)">${o}</button>`).join('')
+        }
+        ${isDone?`<div style="font-size:12px;color:var(--muted);margin-top:8px">You answered: <strong>${isDone.answer}</strong></div>`:''}
+      </div>
+    </div>`;
+  }).join(''):`<div class="empty"><h3>No polls</h3><p>Check back later.</p></div>`;
+}
+function answerPoll(pollId,optIdx,answer){
+  const polls=S.get('polls',[]).map(p=>{
+    if(p.id!==pollId)return p;
+    const v=[...p.votes];v[optIdx]++;return{...p,votes:v};
+  });
+  S.set('polls',polls);
+  const done=answeredPolls();done.push({id:pollId,answer});
+  S.set('answeredPolls_'+currentUser.id,done);
+  addAdminNotif('📋',`${currentUser.firstname} answered a poll: "${answer}"`,'Poll Answer');
+  addMyNotif('📋',`You answered: "${answer}"`,todayStr());
+  renderPolls();markPollsRead();toast(`Response saved: "${answer}"`,'✅');
+}
+function markPollsRead(){
+  const polls=S.get('polls',[]);
+  const seen=S.get('seenPolls_'+currentUser.id,[]);
+  polls.forEach(p=>{if(!seen.includes(p.id))seen.push(p.id)});
+  S.set('seenPolls_'+currentUser.id,seen);updateBadges();
+}
+
+/* ── MESSAGES ─────────────────────────────────── */
+function getMyMessages(){return(S.get('messages',{})[currentUser.id]||[])}
+function renderChat(){
+  const msgs=getMyMessages();
+  document.getElementById('chatBody').innerHTML=msgs.map(m=>`
+    <div style="display:flex;flex-direction:column;align-items:${m.from==='scholar'?'flex-end':'flex-start'}">
+      <div class="bubble ${m.from==='scholar'?'sent':'recv'}">${m.text}<div class="bubble-time">${m.time}</div></div>
+    </div>`).join('')||'<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">No messages yet. Say hello!</div>';
+  const cb=document.getElementById('chatBody');cb.scrollTop=cb.scrollHeight;
+}
+function sendScholarMsg(){
+  const txt=document.getElementById('chatIn').value.trim();if(!txt)return;
+  const msgs=S.get('messages',{});
+  const convo=msgs[currentUser.id]||[];
+  convo.push({from:'scholar',text:txt,time:nowStr(),unread:true});
+  S.set('messages',{...msgs,[currentUser.id]:convo});
+  addAdminNotif('💬',`Message from ${currentUser.firstname}: "${txt.slice(0,60)}"…`,'Message');
+  document.getElementById('chatIn').value='';renderChat();toast('Message sent!','✉️');
+}
+function markMsgRead(){
+  const msgs=S.get('messages',{});
+  const convo=(msgs[currentUser.id]||[]).map(m=>({...m,unread:m.from==='admin'?false:m.unread}));
+  S.set('messages',{...msgs,[currentUser.id]:convo});updateBadges();
+}
+
+/* ── NOTIFICATIONS ────────────────────────────── */
+function addAdminNotif(icon,text,type){
+  const list=S.get('notifs',[]);
+  list.unshift({id:Date.now(),target:'admin',icon,text,type,date:todayStr(),read:false});
+  S.set('notifs',list);
+}
+function addMyNotif(icon,text,date){
+  const list=S.get('mynotifs_'+currentUser.id,[]);
+  list.unshift({id:Date.now(),icon,text,date,read:false});
+  S.set('mynotifs_'+currentUser.id,list);
+}
+function renderNotifs(){
+  // Combine: new announcements, polls, messages, my own activity
+  const notifs=S.get('mynotifs_'+currentUser.id,[]);
+  const msgs=getMyMessages().filter(m=>m.from==='admin');
+  const combined=[
+    ...notifs,
+    ...msgs.slice(0,3).map(m=>({icon:'✉️',text:`Admin: ${m.text.slice(0,60)}`,date:m.time,read:!m.unread}))
+  ].sort((a,b)=>b.id-a.id);
+  document.getElementById('notifList').innerHTML=combined.length?combined.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}">
+      <div class="n-icon n-blue">${n.icon}</div>
+      <div style="flex:1"><div class="notif-text">${n.text}</div><div class="notif-time">${n.date}</div></div>
+      ${!n.read?'<div style="width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:4px"></div>':''}
+    </div>`).join(''):`<div class="empty"><h3>No notifications</h3><p>You're all caught up!</p></div>`;
+  S.set('mynotifs_'+currentUser.id,S.get('mynotifs_'+currentUser.id,[]).map(n=>({...n,read:true})));
+  updateBadges();
+}
+function clearNotifs(){
+  S.set('mynotifs_'+currentUser.id,[]);renderNotifs();updateBadges();
+}
+
+/* ── BADGES ───────────────────────────────────── */
+function updateBadges(){
+  const unseenAnns=S.get('announcements',[]).filter(a=>!(S.get('seenAnns_'+currentUser.id,[]).includes(a.id))).length;
+  const unseenPolls=S.get('polls',[]).filter(p=>p.active&&!answeredPolls().find(a=>a.id===p.id)&&!(S.get('seenPolls_'+currentUser.id,[]).includes(p.id))).length;
+  const unreadMsgs=getMyMessages().filter(m=>m.from==='admin'&&m.unread).length;
+  const myNotifs=S.get('mynotifs_'+currentUser.id,[]).filter(n=>!n.read).length;
+  setBadge('nb-ann',unseenAnns);setBadge('nb-polls',unseenPolls);setBadge('nb-msgs',unreadMsgs);setBadge('nb-notifs',myNotifs);
+  document.getElementById('topDot').style.display=(myNotifs||unreadMsgs)?'block':'none';
+}
+function setBadge(id,count){
+  const el=document.getElementById(id);if(!el)return;
+  el.style.display=count?'':'none';if(count)el.textContent=count;
+}
+
+/* ── HELPERS ──────────────────────────────────── */
+function todayStr(){return new Date().toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}
+function nowStr(){return new Date().toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+function toast(msg,icon='ℹ️'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span class="toast-icon">${icon}</span><div><strong>${msg}</strong></div>`;
+  c.appendChild(t);setTimeout(()=>t.remove(),3500);
+}
+</script>
+</body>
+</html>
