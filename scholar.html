@@ -205,6 +205,14 @@
 
 <div class="toast-wrap" id="toasts"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabase = window.supabase.createClient(
+    window.SUPABASE_URL,
+    window.SUPABASE_ANON_KEY
+  );
+</script>
+
 <script>
 const S={get:(k,d)=>JSON.parse(localStorage.getItem('vho_'+k)||JSON.stringify(d)),set:(k,v)=>localStorage.setItem('vho_'+k,JSON.stringify(v))};
 let currentUser=null;
