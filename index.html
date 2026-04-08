@@ -138,80 +138,69 @@ body{font-family:'DM Sans',sans-serif;background:var(--pink);min-height:100vh;di
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = "https://kyyfmlstyfsorctizztj.supabase.co";
-  const SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE"; // replace with your actual key
-  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+const SUPABASE_URL = "https://kyyfmlstyfsorctizztj.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5eWZtbHN0eWZzb3JjdGl6enRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MzYyNjEsImV4cCI6MjA5MTIxMjI2MX0.1TlWmjoDAsezW7-dMSltwWAbjEgNIp_Z8pqJ8pDy7Sw";
 
-<script>
-let role='admin';
-// Restore remembered email
-window.onload=()=>{
-  const saved=localStorage.getItem('vho_remember');
-  if(saved){document.getElementById('loginEmail').value=saved;document.getElementById('rememberMe').checked=true}
-  // Show hint once
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let role = 'admin';
+
+window.onload = () => {
+  const saved = localStorage.getItem('vho_remember');
+  if(saved){ document.getElementById('loginEmail').value = saved; document.getElementById('rememberMe').checked = true }
+
   if(!sessionStorage.getItem('hinted')){
     sessionStorage.setItem('hinted','1');
-    const h=document.createElement('div');h.className='hint-box';
+    const h = document.createElement('div'); h.className='hint-box';
     h.innerHTML='<strong>Demo credentials</strong>Admin: admin@vho.org / admin123<br>Scholar: firstname@vho.org';
-    document.body.appendChild(h);setTimeout(()=>h.remove(),6000);
+    document.body.appendChild(h); setTimeout(()=>h.remove(),6000);
   }
 };
-function setRole(r,el){role=r;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on')}
-function showErr(msg){const e=document.getElementById('errMsg');e.textContent=msg;e.classList.add('show')}
+
+function setRole(r,el){ role=r; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on') }
+function showErr(msg){ const e=document.getElementById('errMsg'); e.textContent=msg; e.classList.add('show') }
+
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPw').value;
+  const remember = document.getElementById('rememberMe').checked;
+  if(!email || !pw){ showErr('Please enter your email and password.'); return; }
 
-  if(!email || !pw){ showErr('Enter email and password'); return; }
-
-  // Login via Supabase
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: pw });
   if(error){ showErr(error.message); return; }
 
-  // Get profile info (role)
   const { data: profile, error: pError } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', data.user.id)
     .single();
-
   if(pError){ showErr(pError.message); return; }
 
-  // Remember email
-  if(document.getElementById('rememberMe').checked){
-    localStorage.setItem('vho_remember', email);
-  } else localStorage.removeItem('vho_remember');
-
-  // Redirect based on role
+  if(remember) localStorage.setItem('vho_remember', email); else localStorage.removeItem('vho_remember');
   window.location.href = profile.role === 'admin' ? 'admin-dashboard.html' : 'scholar-dashboard.html';
 }
-  // Scholar login
-  const scholar=users.find(u=>u.email===email&&u.role==='scholar'&&u.status!=='inactive');
-  if(scholar){
-    // Default pass: firstname@vho.org
-    const defPw=scholar.firstname.toLowerCase()+'@vho.org';
-    if(pw===defPw||pw===scholar.password){
-      localStorage.setItem('vho_role','scholar');
-      localStorage.setItem('vho_current',JSON.stringify(scholar));
-      window.location.href='scholar.html';return;
-    }
-  }
-  showErr('Invalid credentials. Default password: firstname@vho.org');
+
+function openForgot(e){ e.preventDefault(); document.getElementById('forgotModal').classList.add('open') }
+function closeForgot(){ 
+  document.getElementById('forgotModal').classList.remove('open'); 
+  document.getElementById('forgotStep1').style.display='block'; 
+  document.getElementById('forgotStep2').style.display='none'; 
+  document.getElementById('s2').classList.remove('done'); 
 }
-function openForgot(e){e.preventDefault();document.getElementById('forgotModal').classList.add('open')}
-function closeForgot(){document.getElementById('forgotModal').classList.remove('open');document.getElementById('forgotStep1').style.display='block';document.getElementById('forgotStep2').style.display='none';document.getElementById('s2').classList.remove('done')}
-function sendReset(){
-  const email=document.getElementById('forgotEmail').value.trim();
-  if(!email){alert('Please enter your email.');return}
+
+async function sendReset() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if(!email){ alert('Please enter your email'); return; }
+
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/reset-password.html'
+  });
+  if(error){ alert(error.message); return; }
+
   document.getElementById('s2').classList.add('done');
-  document.getElementById('sentTo').textContent=email;
+  document.getElementById('sentTo').textContent = email;
   document.getElementById('forgotStep1').style.display='none';
   document.getElementById('forgotStep2').style.display='block';
-  // Open Gmail compose in new tab
-  const sub=encodeURIComponent('VHO SMS - Password Reset Request');
-  const body=encodeURIComponent(`Hello,\n\nA password reset was requested for: ${email}\n\nYour default password is: firstname@vho.org\n\nIf you need a new password, please contact the VHO Admin.\n\nVictoria Heartstrong Organization`);
-  window.open(`https://mail.google.com/mail/?view=cm&to=${email}&su=${sub}&body=${body}`,'_blank');
 }
 </script>
 </body>
